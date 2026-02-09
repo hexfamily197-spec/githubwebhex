@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForceTracker - F1, F2, F3 Tracking</title>
+    <style>
+        /* CSS STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            min-height: 90vh;
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, #4a6fa5 0%, #2c3e50 100%);
+            color: white;
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #current-user {
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #fc8181;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* MAIN CONTENT */
+        .content {
+            padding: 30px;
+        }
+
+        /* LOGIN SECTION */
+        #login-section {
+            max-width: 500px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .form-box {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .form-box h2 {
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: #718096;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* DASHBOARD */
+        #dashboard-section {
+            display: none;
+        }
+
+        /* ADMIN DASHBOARD */
+        #admin-section {
+            display: none;
+        }
+
+        /* WEEKLY REMINDER */
+        .reminder {
+            background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reminder-content h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* FORCE CARDS */
+        .force-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .force-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .force-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .force-card.f1 {
+            border-top: 5px solid #4C51BF;
+        }
+
+        .force-card.f2 {
+            border-top: 5px solid #38B2AC;
+        }
+
+        .force-card.f3 {
+            border-top: 5px solid #ED8936;
+        }
+
+        .force-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .force-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .force-value {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #2d3748;
+        }
+
+        .force-unit {
+            font-size: 18px;
+            color: #718096;
+        }
+
+        .force-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .type-fighter {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .type-shooter {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .type-rider {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .force-date {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        /* RECORD FORM */
+        .record-form {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        .category-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .cat-btn {
+            padding: 15px 25px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .cat-btn.active {
+            border-color: #667eea;
+            background: #ebf4ff;
+            color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .type-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .type-btn {
+            padding: 15px 25px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .type-btn.active {
+            transform: scale(1.05);
+        }
+
+        .type-btn.fighter.active {
+            border-color: #c53030;
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .type-btn.shooter.active {
+            border-color: #2b6cb0;
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .type-btn.rider.active {
+            border-color: #276749;
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .value-input {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .value-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #4a5568;
+        }
+
+        .input-with-unit {
+            display: flex;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px 0 0 10px;
+            border-right: none;
+        }
+
+        .unit {
+            padding: 15px 20px;
+            background: #e2e8f0;
+            border: 2px solid #e2e8f0;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        /* HISTORY SECTION */
+        .history-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            background: #f7fafc;
+            padding: 15px;
+            text-align: left;
+            color: #4a5568;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .history-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .history-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .category-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .badge-f1 {
+            background: #ebf4ff;
+            color: #4C51BF;
+        }
+
+        .badge-f2 {
+            background: #e6fffa;
+            color: #38B2AC;
+        }
+
+        .badge-f3 {
+            background: #fffaf0;
+            color: #ED8936;
+        }
+
+        .type-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .delete-btn {
+            padding: 5px 10px;
+            background: #fed7d7;
+            color: #c53030;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #feb2b2;
+        }
+
+        .delete-user-btn {
+            padding: 5px 10px;
+            background: #feb2b2;
+            color: #9b2c2c;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .delete-user-btn:hover {
+            background: #fc8181;
+        }
+
+        /* STATS SUMMARY */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        /* ADMIN STYLES */
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            transition: height 0.5s ease;
+        }
+
+        .progress-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #718096;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* USER MANAGEMENT SECTION */
+        .user-management {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+
+        .user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s;
+        }
+
+        .user-row:hover {
+            background: #f7fafc;
+        }
+
+        .user-info-column {
+            flex: 1;
+        }
+
+        .user-username {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2d3748;
+        }
+
+        .user-reg-date {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px;
+        }
+
+        .user-stat {
+            font-size: 12px;
+            color: #4a5568;
+            background: #f7fafc;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-user-btn {
+            padding: 8px 15px;
+            background: #bee3f8;
+            color: #2b6cb0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-user-btn-large {
+            padding: 8px 15px;
+            background: #fed7d7;
+            color: #c53030;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .delete-user-btn-large:hover {
+            background: #feb2b2;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        /* UTILITIES */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .force-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-buttons, .type-buttons {
+                flex-direction: column;
+            }
+            
+            .reminder {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .history-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .stats-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-controls {
+                flex-direction: column;
+            }
+            
+            .user-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .user-actions {
+                align-self: flex-end;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <div style="font-size: 36px;">💪</div>
+                <h1>ForceTracker</h1>
+            </div>
+            <div class="user-info">
+                <div id="current-user">Not logged in</div>
+                <div class="auth-buttons">
+                    <button id="login-btn" class="btn btn-primary">Login</button>
+                    <button id="register-btn" class="btn">Sign Up</button>
+                    <button id="logout-btn" class="btn btn-danger hidden">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+            <!-- LOGIN/REGISTER SECTION -->
+            <div id="login-section">
+                <div class="form-box">
+                    <h2>Welcome to ForceTracker</h2>
+                    <p class="mb-20">Track and monitor your F1, F2, and F3 progress</p>
+                    
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="login">Login</button>
+                        <button class="tab-btn" data-tab="register">Create Account</button>
+                    </div>
+                    
+                    <!-- LOGIN FORM -->
+                    <div id="login-tab" class="tab-content active">
+                        <div class="input-group">
+                            <label for="login-username">Username</label>
+                            <input type="text" id="login-username" placeholder="Your username">
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" placeholder="Your password">
+                        </div>
+                        <button id="submit-login" class="btn btn-primary" style="width: 100%; padding: 15px;">
+                            Login to My Account
+                        </button>
+                    </div>
+                    
+                    <!-- REGISTER FORM -->
+                    <div id="register-tab" class="tab-content">
+                        <div class="input-group">
+                            <label for="reg-username">Username</label>
+                            <input type="text" id="reg-username" placeholder="Choose a username">
+                        </div>
+                        <div class="input-group">
+                            <label for="reg-password">Password</label>
+                            <input type="password" id="reg-password" placeholder="Create a secure password">
+                        </div>
+                        <div class="input-group">
+                            <label for="confirm-password">Confirm Password</label>
+                            <input type="password" id="confirm-password" placeholder="Repeat your password">
+                        </div>
+                        <button id="submit-register" class="btn btn-primary" style="width: 100%; padding: 15px;">
+                            Create My Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD (visible only when logged in) -->
+            <div id="dashboard-section">
+                <!-- WEEKLY REMINDER -->
+                <div class="reminder">
+                    <div class="reminder-content">
+                        <h3>📅 Time for your weekly update!</h3>
+                        <p>Update your F1, F2, and F3 measurements to track your progress</p>
+                    </div>
+                    <button id="add-record-btn" class="btn btn-primary">➕ Add New Record</button>
+                </div>
+
+                <!-- STATS SUMMARY -->
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <h4>Total Records</h4>
+                        <div class="stat-value" id="total-records">0</div>
+                        <div class="stat-label">All time records</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>This Week</h4>
+                        <div class="stat-value" id="week-records">0</div>
+                        <div class="stat-label">Records added this week</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Average Force</h4>
+                        <div class="stat-value" id="average-force">0</div>
+                        <div class="stat-label">Million average</div>
+                    </div>
+                </div>
+
+                <!-- FORCE CARDS -->
+                <div class="force-cards">
+                    <!-- F1 -->
+                    <div class="force-card f1">
+                        <div class="force-icon">⚡</div>
+                        <div class="force-title">Force F1</div>
+                        <div class="force-value" id="f1-value">--</div>
+                        <div class="force-unit">Million</div>
+                        <div id="f1-type" class="force-type"></div>
+                        <div class="force-date" id="f1-date">Last record: --</div>
+                        <div class="card-buttons">
+                            <button class="btn btn-primary btn-small" data-category="F1">Add Record</button>
+                            <button class="btn btn-small view-history-btn" data-category="F1">History</button>
+                        </div>
+                    </div>
+
+                    <!-- F2 -->
+                    <div class="force-card f2">
+                        <div class="force-icon">🔥</div>
+                        <div class="force-title">Force F2</div>
+                        <div class="force-value" id="f2-value">--</div>
+                        <div class="force-unit">Million</div>
+                        <div id="f2-type" class="force-type"></div>
+                        <div class="force-date" id="f2-date">Last record: --</div>
+                        <div class="card-buttons">
+                            <button class="btn btn-primary btn-small" data-category="F2">Add Record</button>
+                            <button class="btn btn-small view-history-btn" data-category="F2">History</button>
+                        </div>
+                    </div>
+
+                    <!-- F3 -->
+                    <div class="force-card f3">
+                        <div class="force-icon">💪</div>
+                        <div class="force-title">Force F3</div>
+                        <div class="force-value" id="f3-value">--</div>
+                        <div class="force-unit">Million</div>
+                        <div id="f3-type" class="force-type"></div>
+                        <div class="force-date" id="f3-date">Last record: --</div>
+                        <div class="card-buttons">
+                            <button class="btn btn-primary btn-small" data-category="F3">Add Record</button>
+                            <button class="btn btn-small view-history-btn" data-category="F3">History</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORM TO ADD RECORD -->
+                <div class="record-form" id="record-form">
+                    <h3 class="form-title">📝 Record New Measurement</h3>
+                    
+                    <div class="category-buttons">
+                        <button class="cat-btn active" data-category="F1">F1</button>
+                        <button class="cat-btn" data-category="F2">F2</button>
+                        <button class="cat-btn" data-category="F3">F3</button>
+                    </div>
+                    
+                    <div class="type-buttons">
+                        <button class="type-btn fighter active" data-type="fighter">
+                            <span>🥊</span> Fighter
+                        </button>
+                        <button class="type-btn shooter" data-type="shooter">
+                            <span>🎯</span> Shooter
+                        </button>
+                        <button class="type-btn rider" data-type="rider">
+                            <span>🏍️</span> Rider
+                        </button>
+                    </div>
+                    
+                    <div class="value-input">
+                        <label id="force-label">My F1 Force is:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="force-input" min="1" max="10000" placeholder="320" step="0.1">
+                            <div class="unit">Million</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button id="save-record-btn" class="btn btn-primary" style="padding: 15px 40px; font-size: 18px;">
+                            💾 Save Record
+                        </button>
+                        <button id="cancel-record-btn" class="btn" style="padding: 15px 40px; font-size: 18px; margin-left: 10px;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RECORDS HISTORY -->
+                <div class="history-section">
+                    <div class="section-title">
+                        <h3>📊 Records History</h3>
+                        <button id="clear-history-btn" class="btn btn-danger">Clear All</button>
+                    </div>
+                    
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                            <!-- Records will be loaded here dynamically -->
+                            <tr id="no-records">
+                                <td colspan="5" class="text-center" style="padding: 40px; color: #a0aec0;">
+                                    No records yet. Add your first record!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADMIN DASHBOARD (visible only for Hexfamily) -->
+            <div id="admin-section">
+                <!-- WEEKLY REMINDER for admin -->
+                <div class="reminder">
+                    <div class="reminder-content">
+                        <h3>👑 Administrator Panel</h3>
+                        <p>Complete view of all users and their progression</p>
+                    </div>
+                    <div>
+                        <button id="export-excel-btn" class="btn btn-secondary">📊 Export to Excel</button>
+                        <button id="refresh-admin-btn" class="btn btn-primary">🔄 Refresh</button>
+                    </div>
+                </div>
+
+                <!-- DATA SUMMARY -->
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <h4>Total Users</h4>
+                        <div class="stat-value" id="admin-total-users">0</div>
+                        <div class="stat-label">Registered in the system</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Records</h4>
+                        <div class="stat-value" id="admin-total-records">0</div>
+                        <div class="stat-label">In the entire database</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>This Week</h4>
+                        <div class="stat-value" id="admin-week-records">0</div>
+                        <div class="stat-label">New records this week</div>
+                    </div>
+                </div>
+
+                <!-- USER MANAGEMENT SECTION -->
+                <div class="user-management">
+                    <div class="section-title">
+                        <h3>👥 User Management</h3>
+                        <div>
+                            <button id="show-all-users-btn" class="btn btn-primary">Show All Users</button>
+                        </div>
+                    </div>
+                    
+                    <div id="users-list-container">
+                        <!-- Users will be loaded here -->
+                        <div id="no-users-message" class="text-center" style="padding: 40px; color: #a0aec0;">
+                            Loading users...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILTERS AND CONTROLS -->
+                <div class="record-form" style="max-width: 100%;">
+                    <h3 class="form-title">🔍 Visualization Filters</h3>
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Select User:</label>
+                            <select id="admin-user-select" class="input-group" style="width: 100%; padding: 10px;">
+                                <option value="all">All users</option>
+                                <!-- Users will be loaded here -->
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Select Category:</label>
+                            <select id="admin-category-select" class="input-group" style="width: 100%; padding: 10px;">
+                                <option value="all">All categories</option>
+                                <option value="F1">F1</option>
+                                <option value="F2">F2</option>
+                                <option value="F3">F3</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Date Range:</label>
+                            <select id="admin-date-range" class="input-group" style="width: 100%; padding: 10px;">
+                                <option value="all">All time</option>
+                                <option value="week">Last week</option>
+                                <option value="month">Last month</option>
+                                <option value="quarter">Last quarter</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button id="apply-filters-btn" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+
+                <!-- USERS TABLE -->
+                <div class="history-section">
+                    <div class="section-title">
+                        <h3>📊 All Users Data Records</h3>
+                        <div>
+                            <button id="admin-download-csv" class="btn btn-secondary">📥 Download CSV</button>
+                            <button id="admin-print-btn" class="btn">🖨️ Print</button>
+                        </div>
+                    </div>
+                    
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Registration Date</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Record Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PROGRESSION CHARTS -->
+                <div class="history-section" style="margin-top: 30px;">
+                    <div class="section-title">
+                        <h3>📈 Weekly Progression by User</h3>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <h4 style="margin-bottom: 15px;">F1 Progression</h4>
+                            <div id="f1-progress-chart" style="height: 200px; display: flex; align-items: flex-end; gap: 5px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                <!-- Bar chart will be generated here -->
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <h4 style="margin-bottom: 15px;">F2 Progression</h4>
+                            <div id="f2-progress-chart" style="height: 200px; display: flex; align-items: flex-end; gap: 5px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                <!-- Bar chart will be generated here -->
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            <h4 style="margin-bottom: 15px;">F3 Progression</h4>
+                            <div id="f3-progress-chart" style="height: 200px; display: flex; align-items: flex-end; gap: 5px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                <!-- Bar chart will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">⚠️ Confirm Deletion</h3>
+            <p id="modal-message" style="margin-bottom: 30px;">Are you sure you want to delete this record?</p>
+            <div style="display: flex; gap: 15px;">
+                <button id="modal-confirm" class="btn btn-danger" style="flex: 1;">Yes, Delete</button>
+                <button id="modal-cancel" class="btn" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE USER MODAL -->
+    <div id="delete-user-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">⚠️ Delete User Account</h3>
+            <p id="delete-user-message" style="margin-bottom: 30px;">Are you sure you want to delete this user account?</p>
+            <p style="margin-bottom: 20px; color: #c53030; font-weight: bold;">
+                ⚠️ Warning: This action will permanently delete all user data and cannot be undone!
+            </p>
+            <div style="display: flex; gap: 15px;">
+                <button id="delete-user-confirm" class="btn btn-danger" style="flex: 1;">Yes, Delete User</button>
+                <button id="delete-user-cancel" class="btn" style="flex: 1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // ==============================================
+        // SIMULATED DATABASE (LocalStorage)
+        // ==============================================
+        const DB = {
+            // Get users
+            getUsers: function() {
+                const users = localStorage.getItem('force_tracker_users');
+                return users ? JSON.parse(users) : [];
+            },
+            
+            // Save users
+            saveUsers: function(users) {
+                localStorage.setItem('force_tracker_users', JSON.stringify(users));
+            },
+            
+            // Get records for current user
+            getRecords: function(userId) {
+                const key = `force_tracker_records_${userId}`;
+                const records = localStorage.getItem(key);
+                return records ? JSON.parse(records) : [];
+            },
+            
+            // Save records for current user
+            saveRecords: function(userId, records) {
+                const key = `force_tracker_records_${userId}`;
+                localStorage.setItem(key, JSON.stringify(records));
+            },
+            
+            // Add a record (now with type)
+            addRecord: function(userId, category, value, type) {
+                const records = this.getRecords(userId);
+                const newRecord = {
+                    id: Date.now(),
+                    category: category,
+                    value: parseFloat(value),
+                    type: type, // fighter, shooter, or rider
+                    date: new Date().toISOString()
+                };
+                records.unshift(newRecord);
+                this.saveRecords(userId, records);
+                return newRecord;
+            },
+            
+            // Delete a record
+            deleteRecord: function(userId, recordId) {
+                let records = this.getRecords(userId);
+                records = records.filter(record => record.id !== recordId);
+                this.saveRecords(userId, records);
+            },
+            
+            // Delete all records
+            clearRecords: function(userId) {
+                this.saveRecords(userId, []);
+            },
+            
+            // Delete a user and all their data
+            deleteUser: function(userId) {
+                // Remove user from users list
+                let users = this.getUsers();
+                users = users.filter(user => user.id !== userId);
+                this.saveUsers(users);
+                
+                // Remove user's records from localStorage
+                localStorage.removeItem(`force_tracker_records_${userId}`);
+                
+                return true;
+            },
+            
+            // Get user by username
+            getUserByUsername: function(username) {
+                const users = this.getUsers();
+                return users.find(user => user.username === username);
+            }
+        };
+
+        // ==============================================
+        // APPLICATION STATE
+        // ==============================================
+        const AppState = {
+            currentUser: null,
+            currentCategory: 'F1',
+            currentType: 'fighter',
+            recordsToDelete: null,
+            userToDelete: null
+        };
+
+        // ==============================================
+        // UI FUNCTIONS
+        // ==============================================
+        const UI = {
+            // Show/hide sections
+            showLoginSection: function() {
+                document.getElementById('login-section').style.display = 'block';
+                document.getElementById('dashboard-section').style.display = 'none';
+                document.getElementById('admin-section').style.display = 'none';
+                document.getElementById('login-btn').classList.remove('hidden');
+                document.getElementById('register-btn').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.add('hidden');
+                document.getElementById('current-user').textContent = 'Not logged in';
+            },
+            
+            showDashboard: function(username) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('admin-section').style.display = 'none';
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('register-btn').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('current-user').textContent = `👤 ${username}`;
+                
+                // Update dashboard
+                this.updateDashboard();
+            },
+            
+            showAdminDashboard: function(username) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'none';
+                document.getElementById('admin-section').style.display = 'block';
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('register-btn').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('current-user').textContent = `👑 ADMIN: ${username}`;
+                
+                // Load admin data
+                Admin.loadAdminData();
+            },
+            
+            // Update force cards
+            updateForceCards: function() {
+                if (!AppState.currentUser) return;
+                
+                const records = DB.getRecords(AppState.currentUser.id);
+                
+                // Get latest record for each category
+                const latest = {
+                    F1: records.find(r => r.category === 'F1'),
+                    F2: records.find(r => r.category === 'F2'),
+                    F3: records.find(r => r.category === 'F3')
+                };
+                
+                // Update F1
+                if (latest.F1) {
+                    document.getElementById('f1-value').textContent = latest.F1.value;
+                    const date = new Date(latest.F1.date);
+                    document.getElementById('f1-date').textContent = 
+                        `Last record: ${date.toLocaleDateString('en-US')} ${date.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}`;
+                    
+                    // Update type
+                    const typeElement = document.getElementById('f1-type');
+                    typeElement.textContent = this.getTypeDisplayName(latest.F1.type);
+                    typeElement.className = 'force-type type-' + latest.F1.type;
+                } else {
+                    document.getElementById('f1-type').textContent = '';
+                }
+                
+                // Update F2
+                if (latest.F2) {
+                    document.getElementById('f2-value').textContent = latest.F2.value;
+                    const date = new Date(latest.F2.date);
+                    document.getElementById('f2-date').textContent = 
+                        `Last record: ${date.toLocaleDateString('en-US')} ${date.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}`;
+                    
+                    // Update type
+                    const typeElement = document.getElementById('f2-type');
+                    typeElement.textContent = this.getTypeDisplayName(latest.F2.type);
+                    typeElement.className = 'force-type type-' + latest.F2.type;
+                } else {
+                    document.getElementById('f2-type').textContent = '';
+                }
+                
+                // Update F3
+                if (latest.F3) {
+                    document.getElementById('f3-value').textContent = latest.F3.value;
+                    const date = new Date(latest.F3.date);
+                    document.getElementById('f3-date').textContent = 
+                        `Last record: ${date.toLocaleDateString('en-US')} ${date.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}`;
+                    
+                    // Update type
+                    const typeElement = document.getElementById('f3-type');
+                    typeElement.textContent = this.getTypeDisplayName(latest.F3.type);
+                    typeElement.className = 'force-type type-' + latest.F3.type;
+                } else {
+                    document.getElementById('f3-type').textContent = '';
+                }
+            },
+            
+            // Update history table
+            updateHistoryTable: function() {
+                if (!AppState.currentUser) return;
+                
+                const records = DB.getRecords(AppState.currentUser.id);
+                const tbody = document.getElementById('history-body');
+                
+                // Clear table
+                tbody.innerHTML = '';
+                
+                if (records.length === 0) {
+                    tbody.innerHTML = `
+                        <tr id="no-records">
+                            <td colspan="5" class="text-center" style="padding: 40px; color: #a0aec0;">
+                                No records yet. Add your first record!
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Add each record to the table
+                records.forEach(record => {
+                    const date = new Date(record.date);
+                    const row = document.createElement('tr');
+                    
+                    // Determine category class
+                    let badgeClass = '';
+                    if (record.category === 'F1') badgeClass = 'badge-f1';
+                    if (record.category === 'F2') badgeClass = 'badge-f2';
+                    if (record.category === 'F3') badgeClass = 'badge-f3';
+                    
+                    // Determine type class and icon
+                    let typeBadgeClass = '';
+                    let typeIcon = '';
+                    if (record.type === 'fighter') {
+                        typeBadgeClass = 'type-fighter';
+                        typeIcon = '🥊';
+                    } else if (record.type === 'shooter') {
+                        typeBadgeClass = 'type-shooter';
+                        typeIcon = '🎯';
+                    } else if (record.type === 'rider') {
+                        typeBadgeClass = 'type-rider';
+                        typeIcon = '🏍️';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${date.toLocaleDateString('en-US')} ${date.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</td>
+                        <td><span class="category-badge ${badgeClass}">${record.category}</span></td>
+                        <td><span class="type-badge ${typeBadgeClass}">${typeIcon} ${this.getTypeDisplayName(record.type)}</span></td>
+                        <td><strong>${record.value} Million</strong></td>
+                        <td>
+                            <button class="delete-btn" data-id="${record.id}">Delete</button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const recordId = parseInt(this.dataset.id);
+                        AppState.recordsToDelete = recordId;
+                        UI.showConfirmModal('Are you sure you want to delete this record?');
+                    });
+                });
+            },
+            
+            // Update stats summary
+            updateStats: function() {
+                if (!AppState.currentUser) return;
+                
+                const records = DB.getRecords(AppState.currentUser.id);
+                
+                // Total records
+                document.getElementById('total-records').textContent = records.length;
+                
+                // Records this week
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const weekRecords = records.filter(record => {
+                    const recordDate = new Date(record.date);
+                    return recordDate > oneWeekAgo;
+                });
+                document.getElementById('week-records').textContent = weekRecords.length;
+                
+                // Average force
+                if (records.length > 0) {
+                    const total = records.reduce((sum, record) => sum + record.value, 0);
+                    const average = (total / records.length).toFixed(1);
+                    document.getElementById('average-force').textContent = average;
+                } else {
+                    document.getElementById('average-force').textContent = '0';
+                }
+            },
+            
+            // Update complete dashboard
+            updateDashboard: function() {
+                this.updateForceCards();
+                this.updateHistoryTable();
+                this.updateStats();
+            },
+            
+            // Change selected category
+            updateCategorySelection: function(category) {
+                AppState.currentCategory = category;
+                
+                // Update buttons
+                document.querySelectorAll('.cat-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.category === category) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Update label
+                document.getElementById('force-label').textContent = `My ${category} Force is:`;
+            },
+            
+            // Change selected type
+            updateTypeSelection: function(type) {
+                AppState.currentType = type;
+                
+                // Update buttons
+                document.querySelectorAll('.type-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.type === type) {
+                        btn.classList.add('active');
+                    }
+                });
+            },
+            
+            // Get display name for type
+            getTypeDisplayName: function(type) {
+                const types = {
+                    'fighter': 'Fighter',
+                    'shooter': 'Shooter', 
+                    'rider': 'Rider'
+                };
+                return types[type] || type;
+            },
+            
+            // Show confirmation modal
+            showConfirmModal: function(message) {
+                document.getElementById('modal-message').textContent = message;
+                document.getElementById('confirm-modal').classList.add('active');
+            },
+            
+            hideConfirmModal: function() {
+                document.getElementById('confirm-modal').classList.remove('active');
+                AppState.recordsToDelete = null;
+            },
+            
+            // Show delete user modal
+            showDeleteUserModal: function(username, userId) {
+                document.getElementById('delete-user-message').textContent = 
+                    `Are you sure you want to delete user "${username}"?`;
+                AppState.userToDelete = { username, userId };
+                document.getElementById('delete-user-modal').classList.add('active');
+            },
+            
+            hideDeleteUserModal: function() {
+                document.getElementById('delete-user-modal').classList.remove('active');
+                AppState.userToDelete = null;
+            }
+        };
+
+        // ==============================================
+        // ADMIN FUNCTIONS
+        // ==============================================
+        const Admin = {
+            // Load data for administrator
+            loadAdminData: function() {
+                try {
+                    const users = DB.getUsers();
+                    const allRecords = this.getAllRecords();
+                    
+                    console.log("Users found:", users);
+                    console.log("Records found:", allRecords);
+                    
+                    // Update statistics
+                    document.getElementById('admin-total-users').textContent = users.length;
+                    document.getElementById('admin-total-records').textContent = allRecords.length;
+                    
+                    // Calculate records from this week
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    const weekRecords = allRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return recordDate > oneWeekAgo;
+                    });
+                    document.getElementById('admin-week-records').textContent = weekRecords.length;
+                    
+                    // Load user management section
+                    this.loadUserManagement();
+                    
+                    // Load user selector
+                    this.loadUserSelect();
+                    
+                    // Load table with all data
+                    this.loadAdminTable();
+                    
+                    // Generate charts
+                    this.generateProgressCharts();
+                    
+                } catch (error) {
+                    console.error("Error in loadAdminData:", error);
+                    alert("Error loading administrator data");
+                }
+            },
+            
+            // Get all records from all users
+            getAllRecords: function() {
+                const users = DB.getUsers();
+                let allRecords = [];
+                
+                users.forEach(user => {
+                    const userRecords = DB.getRecords(user.id);
+                    // Add username to each record
+                    const recordsWithUsername = userRecords.map(record => ({
+                        ...record,
+                        username: user.username,
+                        userCreatedAt: user.createdAt
+                    }));
+                    allRecords = allRecords.concat(recordsWithUsername);
+                });
+                
+                return allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            },
+            
+            // Load user management section
+            loadUserManagement: function() {
+                const users = DB.getUsers();
+                const container = document.getElementById('users-list-container');
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (users.length === 0) {
+                    container.innerHTML = `
+                        <div id="no-users-message" class="text-center" style="padding: 40px; color: #a0aec0;">
+                            No users registered yet.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Filter out admin users
+                const regularUsers = users.filter(user => !user.isAdmin);
+                
+                if (regularUsers.length === 0) {
+                    container.innerHTML = `
+                        <div id="no-users-message" class="text-center" style="padding: 40px; color: #a0aec0;">
+                            No regular users registered yet.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Create user list
+                regularUsers.forEach(user => {
+                    const userRecords = DB.getRecords(user.id);
+                    const registrationDate = new Date(user.createdAt);
+                    const recordsCount = userRecords.length;
+                    
+                    // Calculate user statistics
+                    const f1Records = userRecords.filter(r => r.category === 'F1').length;
+                    const f2Records = userRecords.filter(r => r.category === 'F2').length;
+                    const f3Records = userRecords.filter(r => r.category === 'F3').length;
+                    
+                    const userRow = document.createElement('div');
+                    userRow.className = 'user-row';
+                    userRow.id = `user-row-${user.id}`;
+                    
+                    userRow.innerHTML = `
+                        <div class="user-info-column">
+                            <div class="user-username">${user.username}</div>
+                            <div class="user-reg-date">Registered: ${registrationDate.toLocaleDateString('en-US')}</div>
+                            <div class="user-stats">
+                                <span class="user-stat">📊 ${recordsCount} records</span>
+                                <span class="user-stat">⚡ F1: ${f1Records}</span>
+                                <span class="user-stat">🔥 F2: ${f2Records}</span>
+                                <span class="user-stat">💪 F3: ${f3Records}</span>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="view-user-btn" data-user-id="${user.id}" data-username="${user.username}">View Data</button>
+                            <button class="delete-user-btn-large delete-user-action" data-user-id="${user.id}" data-username="${user.username}">Delete User</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(userRow);
+                });
+                
+                // Add event listeners to delete user buttons
+                document.querySelectorAll('.delete-user-action').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = parseInt(this.dataset.userId);
+                        const username = this.dataset.username;
+                        UI.showDeleteUserModal(username, userId);
+                    });
+                });
+                
+                // Add event listeners to view user buttons
+                document.querySelectorAll('.view-user-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const username = this.dataset.username;
+                        document.getElementById('admin-user-select').value = username;
+                        Admin.loadAdminTable({ user: username, category: 'all', dateRange: 'all' });
+                        
+                        // Scroll to data table
+                        document.getElementById('admin-table-body').scrollIntoView({ behavior: 'smooth' });
+                    });
+                });
+            },
+            
+            // Load user selector
+            loadUserSelect: function() {
+                const users = DB.getUsers();
+                const select = document.getElementById('admin-user-select');
+                
+                // Clear options (except "All")
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+                
+                // Add each user (excluding administrators)
+                users.forEach(user => {
+                    if (!user.isAdmin) {
+                        const option = document.createElement('option');
+                        option.value = user.username;
+                        option.textContent = user.username;
+                        select.appendChild(option);
+                    }
+                });
+            },
+            
+            // Load administrator table
+            loadAdminTable: function(filters = {}) {
+                try {
+                    let records = this.getAllRecords();
+                    const tbody = document.getElementById('admin-table-body');
+                    
+                    // Apply filters
+                    if (filters.user && filters.user !== 'all') {
+                        records = records.filter(r => r.username === filters.user);
+                    }
+                    
+                    if (filters.category && filters.category !== 'all') {
+                        records = records.filter(r => r.category === filters.category);
+                    }
+                    
+                    if (filters.dateRange && filters.dateRange !== 'all') {
+                        const now = new Date();
+                        let startDate = new Date();
+                        
+                        switch(filters.dateRange) {
+                            case 'week':
+                                startDate.setDate(now.getDate() - 7);
+                                break;
+                            case 'month':
+                                startDate.setMonth(now.getMonth() - 1);
+                                break;
+                            case 'quarter':
+                                startDate.setMonth(now.getMonth() - 3);
+                                break;
+                        }
+                        
+                        records = records.filter(r => new Date(r.date) >= startDate);
+                    }
+                    
+                    // Clear table
+                    tbody.innerHTML = '';
+                    
+                    if (records.length === 0) {
+                        tbody.innerHTML = `
+                            <tr id="no-admin-data">
+                                <td colspan="7" class="text-center" style="padding: 40px; color: #a0aec0;">
+                                    No data to display with current filters.
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    // Add each record to the table
+                    records.forEach(record => {
+                        const date = new Date(record.date);
+                        const regDate = new Date(record.userCreatedAt);
+                        
+                        // Determine category and type
+                        let badgeClass = '';
+                        if (record.category === 'F1') badgeClass = 'badge-f1';
+                        if (record.category === 'F2') badgeClass = 'badge-f2';
+                        if (record.category === 'F3') badgeClass = 'badge-f3';
+                        
+                        let typeBadgeClass = '';
+                        let typeIcon = '';
+                        if (record.type === 'fighter') {
+                            typeBadgeClass = 'type-fighter';
+                            typeIcon = '🥊';
+                        } else if (record.type === 'shooter') {
+                            typeBadgeClass = 'type-shooter';
+                            typeIcon = '🎯';
+                        } else if (record.type === 'rider') {
+                            typeBadgeClass = 'type-rider';
+                            typeIcon = '🏍️';
+                        }
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>${record.username}</strong></td>
+                            <td>${regDate.toLocaleDateString('en-US')}</td>
+                            <td><span class="category-badge ${badgeClass}">${record.category}</span></td>
+                            <td><span class="type-badge ${typeBadgeClass}">${typeIcon} ${UI.getTypeDisplayName(record.type)}</span></td>
+                            <td><strong>${record.value} Million</strong></td>
+                            <td>${date.toLocaleDateString('en-US')}<br><small>${date.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})}</small></td>
+                            <td>
+                                <button class="delete-user-btn" data-record-id="${record.id}" data-username="${record.username}">Delete</button>
+                            </td>
+                        `;
+                        
+                        tbody.appendChild(row);
+                    });
+                    
+                    // Add event listeners to delete record buttons
+                    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const recordId = parseInt(this.dataset.recordId);
+                            const username = this.dataset.username;
+                            
+                            if (confirm(`Are you sure you want to delete this record from ${username}?`)) {
+                                const user = DB.getUserByUsername(username);
+                                if (user) {
+                                    DB.deleteRecord(user.id, recordId);
+                                    Admin.loadAdminTable(filters);
+                                    alert(`Record deleted from ${username}'s account.`);
+                                }
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error("Error in loadAdminTable:", error);
+                }
+            },
+            
+            // Delete user function
+            deleteUser: function(userId, username) {
+                try {
+                    // Delete the user and all their data
+                    const success = DB.deleteUser(userId);
+                    
+                    if (success) {
+                        // Remove user row from UI
+                        const userRow = document.getElementById(`user-row-${userId}`);
+                        if (userRow) {
+                            userRow.remove();
+                        }
+                        
+                        // Update statistics
+                        this.loadAdminData();
+                        
+                        // Show success message
+                        alert(`✅ User "${username}" has been permanently deleted.`);
+                        
+                        // If current user is the deleted user, log them out
+                        if (AppState.currentUser && AppState.currentUser.id === userId) {
+                            Auth.logout();
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error deleting user:", error);
+                    alert("Error deleting user. Please try again.");
+                }
+            },
+            
+            // Calculate weekly progression by user
+            calculateWeeklyProgress: function() {
+                const users = DB.getUsers();
+                const progress = {};
+                
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                
+                users.forEach(user => {
+                    if (!user.isAdmin) {
+                        const records = DB.getRecords(user.id);
+                        
+                        if (records.length === 0) {
+                            progress[user.username] = {
+                                totalIncrease: 0,
+                                weekAverage: 0,
+                                previousAverage: 0
+                            };
+                            return;
+                        }
+                        
+                        const weekRecords = records.filter(r => {
+                            const recordDate = new Date(r.date);
+                            return recordDate > oneWeekAgo;
+                        });
+                        
+                        const olderRecords = records.filter(r => {
+                            const recordDate = new Date(r.date);
+                            return recordDate <= oneWeekAgo;
+                        });
+                        
+                        if (weekRecords.length > 0) {
+                            const weekAvg = weekRecords.reduce((sum, r) => sum + r.value, 0) / weekRecords.length;
+                            
+                            if (olderRecords.length > 0) {
+                                const olderAvg = olderRecords.reduce((sum, r) => sum + r.value, 0) / olderRecords.length;
+                                
+                                progress[user.username] = {
+                                    totalIncrease: (weekAvg - olderAvg).toFixed(1),
+                                    weekAverage: weekAvg.toFixed(1),
+                                    previousAverage: olderAvg.toFixed(1)
+                                };
+                            } else {
+                                progress[user.username] = {
+                                    totalIncrease: weekAvg.toFixed(1),
+                                    weekAverage: weekAvg.toFixed(1),
+                                    previousAverage: 0
+                                };
+                            }
+                        } else {
+                            progress[user.username] = {
+                                totalIncrease: 0,
+                                weekAverage: 0,
+                                previousAverage: 0
+                            };
+                        }
+                    }
+                });
+                
+                return progress;
+            },
+            
+            // Generate progression charts
+            generateProgressCharts: function() {
+                try {
+                    const users = DB.getUsers().filter(u => !u.isAdmin);
+                    const progress = this.calculateWeeklyProgress();
+                    
+                    // Generate chart for F1
+                    const f1Chart = document.getElementById('f1-progress-chart');
+                    f1Chart.innerHTML = '';
+                    
+                    // Generate chart for F2
+                    const f2Chart = document.getElementById('f2-progress-chart');
+                    f2Chart.innerHTML = '';
+                    
+                    // Generate chart for F3
+                    const f3Chart = document.getElementById('f3-progress-chart');
+                    f3Chart.innerHTML = '';
+                    
+                    if (users.length === 0) {
+                        f1Chart.innerHTML = '<div style="text-align: center; padding: 20px; color: #a0aec0;">No registered users</div>';
+                        f2Chart.innerHTML = '<div style="text-align: center; padding: 20px; color: #a0aec0;">No registered users</div>';
+                        f3Chart.innerHTML = '<div style="text-align: center; padding: 20px; color: #a0aec0;">No registered users</div>';
+                        return;
+                    }
+                    
+                    users.forEach(user => {
+                        const userProgress = progress[user.username] || { totalIncrease: 0 };
+                        const increase = parseFloat(userProgress.totalIncrease) || 0;
+                        
+                        // Create bar for F1
+                        const f1Bar = document.createElement('div');
+                        f1Bar.style.cssText = `
+                            flex: 1;
+                            background: ${increase >= 0 ? '#48bb78' : '#fc8181'};
+                            height: ${Math.min(Math.abs(increase) * 10 + 20, 150)}px;
+                            border-radius: 5px 5px 0 0;
+                            position: relative;
+                            transition: height 0.5s ease;
+                            min-width: 30px;
+                        `;
+                        
+                        const f1Label = document.createElement('div');
+                        f1Label.style.cssText = `
+                            position: absolute;
+                            bottom: -25px;
+                            left: 0;
+                            right: 0;
+                            text-align: center;
+                            font-size: 10px;
+                            color: #718096;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        `;
+                        f1Label.textContent = user.username.substring(0, 8);
+                        f1Bar.appendChild(f1Label);
+                        f1Chart.appendChild(f1Bar);
+                        
+                        // Create bar for F2
+                        const f2Bar = document.createElement('div');
+                        f2Bar.style.cssText = `
+                            flex: 1;
+                            background: ${increase >= 0 ? '#4299e1' : '#fc8181'};
+                            height: ${Math.min(Math.abs(increase) * 10 + 20, 150)}px;
+                            border-radius: 5px 5px 0 0;
+                            position: relative;
+                            transition: height 0.5s ease;
+                            min-width: 30px;
+                        `;
+                        
+                        const f2Label = document.createElement('div');
+                        f2Label.style.cssText = `
+                            position: absolute;
+                            bottom: -25px;
+                            left: 0;
+                            right: 0;
+                            text-align: center;
+                            font-size: 10px;
+                            color: #718096;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        `;
+                        f2Label.textContent = user.username.substring(0, 8);
+                        f2Bar.appendChild(f2Label);
+                        f2Chart.appendChild(f2Bar);
+                        
+                        // Create bar for F3
+                        const f3Bar = document.createElement('div');
+                        f3Bar.style.cssText = `
+                            flex: 1;
+                            background: ${increase >= 0 ? '#ed8936' : '#fc8181'};
+                            height: ${Math.min(Math.abs(increase) * 10 + 20, 150)}px;
+                            border-radius: 5px 5px 0 0;
+                            position: relative;
+                            transition: height 0.5s ease;
+                            min-width: 30px;
+                        `;
+                        
+                        const f3Label = document.createElement('div');
+                        f3Label.style.cssText = `
+                            position: absolute;
+                            bottom: -25px;
+                            left: 0;
+                            right: 0;
+                            text-align: center;
+                            font-size: 10px;
+                            color: #718096;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        `;
+                        f3Label.textContent = user.username.substring(0, 8);
+                        f3Bar.appendChild(f3Label);
+                        f3Chart.appendChild(f3Bar);
+                    });
+                } catch (error) {
+                    console.error("Error in generateProgressCharts:", error);
+                }
+            },
+            
+            // Export to Excel
+            exportToExcel: function() {
+                try {
+                    const records = this.getAllRecords();
+                    
+                    if (records.length === 0) {
+                        alert('No data to export');
+                        return;
+                    }
+                    
+                    // Create CSV content
+                    let csvContent = "User,Registration Date,Category,Type,Value (Million),Record Date,Record Time\n";
+                    
+                    records.forEach(record => {
+                        const dataDate = new Date(record.date);
+                        const regDate = new Date(record.userCreatedAt);
+                        
+                        csvContent += `"${record.username}","${regDate.toLocaleDateString('en-US')}","${record.category}","${record.type}","${record.value}","${dataDate.toLocaleDateString('en-US')}","${dataDate.toLocaleTimeString('en-US')}"\n`;
+                    });
+                    
+                    // Create and download file
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", `force_tracker_data_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    alert(`✅ Data exported. ${records.length} records downloaded.`);
+                } catch (error) {
+                    console.error("Error in exportToExcel:", error);
+                    alert("Error exporting data");
+                }
+            }
+        };
+
+        // ==============================================
+        // AUTHENTICATION FUNCTIONS
+        // ==============================================
+        const Auth = {
+            // Register new user
+            register: function(username, password, confirmPassword) {
+                // Validations
+                if (!username || !password) {
+                    alert('❌ Please complete all fields');
+                    return false;
+                }
+                
+                if (password !== confirmPassword) {
+                    alert('❌ Passwords do not match');
+                    return false;
+                }
+                
+                if (password.length < 4) {
+                    alert('❌ Password must be at least 4 characters');
+                    return false;
+                }
+                
+                const users = DB.getUsers();
+                
+                // Check if username already exists
+                if (users.find(u => u.username === username)) {
+                    alert('❌ This username is already taken');
+                    return false;
+                }
+                
+                // Create new user
+                const newUser = {
+                    id: Date.now(),
+                    username: username,
+                    password: password,
+                    isAdmin: username === 'Hexfamily',
+                    createdAt: new Date().toISOString()
+                };
+                
+                users.push(newUser);
+                DB.saveUsers(users);
+                
+                alert('✅ Account created successfully! You can now login.');
+                return true;
+            },
+            
+            // Login
+            login: function(username, password) {
+                const users = DB.getUsers();
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    AppState.currentUser = user;
+                    
+                    // Check if user is admin
+                    if (user.isAdmin) {
+                        UI.showAdminDashboard(user.username);
+                    } else {
+                        UI.showDashboard(user.username);
+                    }
+                    
+                    // Save user in localStorage
+                    localStorage.setItem('force_tracker_current_user', JSON.stringify(user));
+                    
+                    return true;
+                } else {
+                    alert('❌ Incorrect username or password');
+                    return false;
+                }
+            },
+            
+            // Logout
+            logout: function() {
+                AppState.currentUser = null;
+                localStorage.removeItem('force_tracker_current_user');
+                UI.showLoginSection();
+            }
+        };
+
+        // ==============================================
+        // RECORDS FUNCTIONS
+        // ==============================================
+        const Records = {
+            // Add new record
+            addRecord: function(category, value, type) {
+                if (!AppState.currentUser) {
+                    alert('You must login first');
+                    return;
+                }
+                
+                if (!value || value < 0.1 || value > 10000) {
+                    alert('Please enter a valid value between 0.1 and 10,000 Million');
+                    return;
+                }
+                
+                DB.addRecord(AppState.currentUser.id, category, value, type);
+                UI.updateDashboard();
+                
+                alert(`✅ ${category} record saved: ${value} Million (${UI.getTypeDisplayName(type)})`);
+                document.getElementById('force-input').value = '';
+            },
+            
+            // Delete record
+            deleteRecord: function(recordId) {
+                if (!AppState.currentUser) return;
+                
+                DB.deleteRecord(AppState.currentUser.id, recordId);
+                UI.updateDashboard();
+            },
+            
+            // Delete all records
+            clearAllRecords: function() {
+                if (!AppState.currentUser) return;
+                
+                if (confirm('⚠️ Are you sure you want to delete ALL your records?\n\nThis action cannot be undone.')) {
+                    DB.clearRecords(AppState.currentUser.id);
+                    UI.updateDashboard();
+                    alert('✅ All records have been deleted');
+                }
+            }
+        };
+
+        // ==============================================
+        // HELPER FUNCTIONS
+        // ==============================================
+        function createAdminUser() {
+            const users = DB.getUsers();
+            const adminExists = users.find(u => u.username === "Hexfamily");
+            
+            if (!adminExists) {
+                const adminUser = {
+                    id: 999,
+                    username: "Hexfamily",
+                    password: "Hexfamily99",
+                    isAdmin: true,
+                    createdAt: new Date().toISOString()
+                };
+                users.push(adminUser);
+                DB.saveUsers(users);
+                console.log("✅ Administrator user created: Hexfamily / Hexfamily99");
+            }
+        }
+
+        // ==============================================
+        // EVENT LISTENERS
+        // ==============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a logged in user
+            const savedUser = localStorage.getItem('force_tracker_current_user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                if (user) {
+                    AppState.currentUser = user;
+                    if (user.isAdmin) {
+                        UI.showAdminDashboard(user.username);
+                    } else {
+                        UI.showDashboard(user.username);
+                    }
+                }
+            }
+            
+            // Create admin user
+            createAdminUser();
+            
+            // TABS for login/register
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    
+                    // Update active buttons
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tab}-tab`).classList.add('active');
+                    
+                    // Clear forms
+                    if (tab === 'login') {
+                        document.getElementById('login-username').value = '';
+                        document.getElementById('login-password').value = '';
+                    } else {
+                        document.getElementById('reg-username').value = '';
+                        document.getElementById('reg-password').value = '';
+                        document.getElementById('confirm-password').value = '';
+                    }
+                });
+            });
+            
+            // Login/register buttons in header
+            document.getElementById('login-btn').addEventListener('click', function() {
+                document.querySelector('.tab-btn[data-tab="login"]').click();
+            });
+            
+            document.getElementById('register-btn').addEventListener('click', function() {
+                document.querySelector('.tab-btn[data-tab="register"]').click();
+            });
+            
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                Auth.logout();
+            });
+            
+            // Login form
+            document.getElementById('submit-login').addEventListener('click', function() {
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value.trim();
+                
+                if (!username || !password) {
+                    alert('Please complete all fields');
+                    return;
+                }
+                
+                Auth.login(username, password);
+            });
+            
+            // Allow Enter in login
+            document.getElementById('login-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('submit-login').click();
+                }
+            });
+            
+            // Register form
+            document.getElementById('submit-register').addEventListener('click', function() {
+                const username = document.getElementById('reg-username').value.trim();
+                const password = document.getElementById('reg-password').value.trim();
+                const confirmPassword = document.getElementById('confirm-password').value.trim();
+                
+                if (Auth.register(username, password, confirmPassword)) {
+                    // Switch to login tab
+                    document.querySelector('.tab-btn[data-tab="login"]').click();
+                    
+                    // Pre-fill username in login
+                    document.getElementById('login-username').value = username;
+                    document.getElementById('login-password').focus();
+                }
+            });
+            
+            // Allow Enter in register
+            document.getElementById('confirm-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('submit-register').click();
+                }
+            });
+            
+            // Category buttons in cards
+            document.querySelectorAll('.force-card .btn-primary').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.parentElement.querySelector('.view-history-btn').dataset.category;
+                    UI.updateCategorySelection(category);
+                    document.getElementById('force-input').focus();
+                });
+            });
+            
+            // History buttons in cards
+            document.querySelectorAll('.view-history-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    const records = DB.getRecords(AppState.currentUser.id);
+                    const categoryRecords = records.filter(r => r.category === category);
+                    
+                    if (categoryRecords.length === 0) {
+                        alert(`No ${category} records yet`);
+                        return;
+                    }
+                    
+                    let message = `📊 Complete history of ${category}:\n\n`;
+                    categoryRecords.forEach(record => {
+                        const date = new Date(record.date);
+                        message += `• ${date.toLocaleDateString('en-US')}: ${record.value} Million (${UI.getTypeDisplayName(record.type)})\n`;
+                    });
+                    
+                    alert(message);
+                });
+            });
+            
+            // "Add Record" big button
+            document.getElementById('add-record-btn').addEventListener('click', function() {
+                document.getElementById('force-input').focus();
+            });
+            
+            // Category selector in form
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    UI.updateCategorySelection(this.dataset.category);
+                });
+            });
+            
+            // Type selector in form
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    UI.updateTypeSelection(this.dataset.type);
+                });
+            });
+            
+            // Button to save record
+            document.getElementById('save-record-btn').addEventListener('click', function() {
+                const value = document.getElementById('force-input').value;
+                Records.addRecord(AppState.currentCategory, value, AppState.currentType);
+            });
+            
+            // Allow Enter to save record
+            document.getElementById('force-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    Records.addRecord(AppState.currentCategory, this.value, AppState.currentType);
+                }
+            });
+            
+            // Button to cancel record
+            document.getElementById('cancel-record-btn').addEventListener('click', function() {
+                document.getElementById('force-input').value = '';
+            });
+            
+            // Button to clear all history
+            document.getElementById('clear-history-btn').addEventListener('click', function() {
+                Records.clearAllRecords();
+            });
+            
+            // Confirmation modal for records
+            document.getElementById('modal-confirm').addEventListener('click', function() {
+                if (AppState.recordsToDelete) {
+                    Records.deleteRecord(AppState.recordsToDelete);
+                    UI.hideConfirmModal();
+                }
+            });
+            
+            document.getElementById('modal-cancel').addEventListener('click', function() {
+                UI.hideConfirmModal();
+            });
+            
+            // Delete user modal
+            document.getElementById('delete-user-confirm').addEventListener('click', function() {
+                if (AppState.userToDelete) {
+                    Admin.deleteUser(AppState.userToDelete.userId, AppState.userToDelete.username);
+                    UI.hideDeleteUserModal();
+                }
+            });
+            
+            document.getElementById('delete-user-cancel').addEventListener('click', function() {
+                UI.hideDeleteUserModal();
+            });
+            
+            // Close modals by clicking outside
+            document.getElementById('confirm-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    UI.hideConfirmModal();
+                }
+            });
+            
+            document.getElementById('delete-user-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    UI.hideDeleteUserModal();
+                }
+            });
+            
+            // ADMIN EVENT LISTENERS
+            // Button to export to Excel
+            if (document.getElementById('export-excel-btn')) {
+                document.getElementById('export-excel-btn').addEventListener('click', function() {
+                    Admin.exportToExcel();
+                });
+            }
+            
+            // Button to refresh data
+            if (document.getElementById('refresh-admin-btn')) {
+                document.getElementById('refresh-admin-btn').addEventListener('click', function() {
+                    Admin.loadAdminData();
+                });
+            }
+            
+            // Button to show all users
+            if (document.getElementById('show-all-users-btn')) {
+                document.getElementById('show-all-users-btn').addEventListener('click', function() {
+                    Admin.loadUserManagement();
+                });
+            }
+            
+            // Button to apply filters
+            if (document.getElementById('apply-filters-btn')) {
+                document.getElementById('apply-filters-btn').addEventListener('click', function() {
+                    const filters = {
+                        user: document.getElementById('admin-user-select').value,
+                        category: document.getElementById('admin-category-select').value,
+                        dateRange: document.getElementById('admin-date-range').value
+                    };
+                    
+                    Admin.loadAdminTable(filters);
+                });
+            }
+            
+            // Button to download CSV
+            if (document.getElementById('admin-download-csv')) {
+                document.getElementById('admin-download-csv').addEventListener('click', function() {
+                    Admin.exportToExcel();
+                });
+            }
+            
+            // Button to print
+            if (document.getElementById('admin-print-btn')) {
+                document.getElementById('admin-print-btn').addEventListener('click', function() {
+                    window.print();
+                });
+            }
+            
+            // Initialize with F1 and Fighter selected
+            UI.updateCategorySelection('F1');
+            UI.updateTypeSelection('fighter');
+        });
+    </script>
+</body>
+</html>
